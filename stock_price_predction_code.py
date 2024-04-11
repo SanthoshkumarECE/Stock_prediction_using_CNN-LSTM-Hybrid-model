@@ -3,6 +3,7 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from tensorflow.keras.layers import Conv1D, MaxPooling1D
 dataset_train = pd.read_csv('Google_Stock_Price_Train.csv')
 print('shape is = {}'.format(dataset_train.shape))
 print(dataset_train.head())
@@ -29,18 +30,23 @@ print('y_train shape = {}'.format(y_train.shape))
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 X_train.shape
 regressor = Sequential()
-regressor.add(LSTM(units=50, return_sequences=True,
-              input_shape=(X_train.shape[1], 1)))
-regressor.add(Dropout(0.2))
-regressor.add(LSTM(units=50, return_sequences=True))
-regressor.add(Dropout(0.2))
+# Convolutional Layer
+regressor.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(X_train.shape[1], 1)))
+# Max Pooling Layer (Optional)
+regressor.add(MaxPooling1D(pool_size=2))
+# LSTMs with Dropout
 regressor.add(LSTM(units=50, return_sequences=True))
 regressor.add(Dropout(0.2))
 regressor.add(LSTM(units=50))
 regressor.add(Dropout(0.2))
+# Output Layer
 regressor.add(Dense(units=1))
+
+#Compiling the model
 regressor.compile(optimizer='adam', loss='mean_squared_error')
-regressor.fit(X_train, y_train, epochs=100, batch_size=32)
+
+#fitting the model
+regressor.fit(X_train, y_train, epochs=150, batch_size=32)
 dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
 real_stock_price = dataset_test.iloc[:, 1:2].values
 dataset_total = pd.concat(
@@ -63,3 +69,9 @@ plt.xlabel('Time')
 plt.ylabel('Google Stock Price')
 plt.legend()
 plt.show()
+#finding rmse value for accuracy since the prediction is continuous
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import math
+rmse = math.sqrt(mean_squared_error(real_stock_price, predicted_stock_price))
+print("The root mean squared error is {}.".format(rmse))
+
