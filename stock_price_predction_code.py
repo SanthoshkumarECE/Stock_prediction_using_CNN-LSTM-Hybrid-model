@@ -73,5 +73,5 @@ plt.show()
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 rmse = math.sqrt(mean_squared_error(real_stock_price, predicted_stock_price))
-print("The root mean squared error is {}.".format(rmse))
+print("root mean squared error : {}.".format(rmse))
 
